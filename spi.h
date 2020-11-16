@@ -24,19 +24,29 @@
  ********************************/
 
 /**
+ * Transceives data
+ */
+uint8_t spi_transceive(uint8_t b);
+
+/**
  * Initializes the SPI hardware
  */
 void spi_init(void);
 
 /**
- * Writes an byte over the SPI bus
+ * Writes an series bytes over the SPI bus
  */
-void spi_write_byte(uint8_t b);
+void spi_write_bytes(uint8_t *p, uint8_t n);
 
 /**
  * Reads an byte from the SPI bus
  */
 uint8_t spi_read_byte(void);
+
+/**
+ * Reads an series of bytes from the SPI bus
+ */
+void spi_read_bytes(uint8_t *ret, uint8_t n);
 
 /**
  * Selects the device on the default SS pin

@@ -6,10 +6,14 @@
 #define _SD_H
 
 #include "default.h"
+#include "crc.h"
+#include "spi.h"
 
 /*********************************
  * Definitions
  ********************************/
+
+#define SD_CRC7_POLYNOMIAL_BINARY					0b10001001
 
 #define SD_SPI_DATA_RESPONSE_TOKEN_ACCEPTED 		0b010 			/* Accepted */
 #define SD_SPI_DATA_RESPONSE_TOKEN_REJECTED_CRC		0b101 			/* Rejected due to CRC error */
@@ -238,13 +242,52 @@ typedef struct __attribute__ (( packed )) {
 } sd_cid_register_t; 
 
 /*********************************
- * Prototpes
+ * Debugging
  ********************************/
 
 /**
- * Calculates the CRC7 check sum for the specified data
+ * Logs the R1 response over serial
  */
-uint8_t sd_calc_crc7(uint8_t *data, uint8_t n);
+void sd_spi_log_r1(sd_spi_response_r1_t resp);
+
+/**
+ * Logs the R7 response over serial
+ */
+void sd_spi_log_r7(sd_spi_response_r7_t resp);
+
+/**
+ * Logs the command over serial
+ */
+void sd_spi_log_cmd(sd_spi_command_t cmd);
+
+/*********************************
+ * Prototpes ( Communication )
+ ********************************/
+
+/**
+ * Sends an command and reads the R1 response
+ */
+sd_spi_response_r1_t sd_send_cmd_get_r1(sd_spi_command_t cmd);
+
+/**
+ * Sends an command and reads the R7 response
+ */
+sd_spi_response_r7_t sd_send_cmd_get_r7(sd_spi_command_t cmd);
+
+/*********************************
+ * Prototpes ( General )
+ ********************************/
+
+/**
+ * Initializes the SDCard
+ */
+void sd_init(void);
+
+
+/**
+ * Goes into IDLE state
+ */
+sd_spi_response_r1_t sd_go_idle(void);
 
 /**
  * Gets the CID register stucture from the SD card
@@ -255,5 +298,10 @@ sd_cid_register_t sd_get_cid_register(void);
  * Gets the CSD register structure from the SD card
  */
 sd_csd_register_t sd_get_csd_register(void);
+
+/**
+ * Gets the operating conditions of the SD card
+ */
+sd_spi_response_r7_t sd_get_ocr(void);
 
 #endif

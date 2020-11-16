@@ -14,7 +14,7 @@ AVR_SIZE := /bin/avr-size
 AVR_OBJCOPY := /bin/avr-objcopy
 
 # Input files
-SOURCES := main.c i2c.c ssd1306.c font.c sd.c spi.c
+SOURCES := main.c i2c.c ssd1306.c font.c sd.c spi.c crc.c usart.c
 
 # Arguments
 AVRDUDE_ARGS := -P $(DEVICE_PATH) -p $(MCU) -c $(PROGRAMMER) -U flash:w:$(IHEX_OUT)

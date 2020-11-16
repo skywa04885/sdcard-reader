@@ -13,24 +13,34 @@ void spi_init(void)
 	// Configures the SCK, MOSI and CS pin as output, and the MISO
 	//  as  input
 	SPI_DDR |= (1 << SPI_SCK) | (1 << SPI_MOSI) | (1 << SPI_SS);
-	SPI_DDR &= ~SPI_MISO;
+	SPI_DDR |= SPI_MISO;
 
 	// Clears the status register, and enables the SPI hardware as
-	//  master and a clock prescalar of osc/64
+	//  master and a clock prescalar of osc/128
 	SPSR = 0x00;
-	SPCR = (1 << SPE) | (1 << MSTR) | (1 << SPR1);
-	
-	// Deselects the default SS pin
+	SPCR = (1 << SPE) | (1 << MSTR) | (1 << SPR1) << (1 << SPR0);
+
+	// Deselects the SPI device
 	spi_deselect_default();
 }
 
 /**
- * Writes an byte over the SPI bus
+ * Transceives data
  */
-void spi_write_byte(uint8_t b)
+uint8_t spi_transceive(uint8_t b)
 {
 	SPDR = b;
 	while (!(SPSR & (1 << SPIF)));
+	return SPDR;
+}
+
+/**
+ * Writes an series bytes over the SPI bus
+ */
+void spi_write_bytes(uint8_t *p, uint8_t n)
+{
+	for (uint8_t i = 0; i < n; ++i)
+		spi_transceive(p[i]);
 }
 
 /**
@@ -38,8 +48,20 @@ void spi_write_byte(uint8_t b)
  */
 uint8_t spi_read_byte(void)
 {
-	while (!(SPSR & (1 << SPIF)));
-	return SPDR;
+	uint8_t res, i;
+	while ((res = spi_transceive(0xFF)) == 0xFF) {
+		if (i++ > 16) break;
+	}
+	return res;
+}
+
+/**
+ * Reads an series of bytes from the SPI bus
+ */
+void spi_read_bytes(uint8_t *ret, uint8_t n)
+{
+	for (uint8_t i = 0; i < n; ++i)
+		ret[i] = spi_read_byte();
 }
 
 /**
